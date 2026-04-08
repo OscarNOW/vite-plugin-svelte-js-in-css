@@ -57,7 +57,17 @@ export function transform(src: string, fileName: string, {
 
             if (declarationNode.value.startsWith(cssJsFunctionName + '(') && declarationNode.value.endsWith(')')) {
 
-                const js = declarationNode.value.slice(cssJsFunctionName.length + 1, -1).trim();
+                if (
+                    (!declarationNode.value.startsWith(cssJsFunctionName + '(' + '/*')) ||
+                    (!declarationNode.value.endsWith('*/' + ')'))
+                ) {
+                    throw new Error(`The js in css function syntax is js(/* jsexpression */)`);
+                }
+
+                const js = declarationNode.value.slice(
+                    cssJsFunctionName.length + '(/*'.length,
+                    -1 * '*/)'.length
+                ).trim();
 
                 const jsStartIndex = newSrc.indexOf(js, declarationNode.start);
                 if (jsStartIndex === -1) {
