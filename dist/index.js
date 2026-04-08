@@ -5,9 +5,6 @@ export default function svelteJsInCss({ fileNameHasSalt = '', namePrefix = '', c
     return {
         name: 'svelte-js-in-css',
         enforce: 'pre', // before svelte
-        handleHotUpdate(ctx) {
-            console.log('handleHotUpdate', ctx);
-        },
         transform: {
             filter: {
                 id: fileRegex,
