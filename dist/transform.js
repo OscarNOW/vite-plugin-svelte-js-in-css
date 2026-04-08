@@ -29,7 +29,11 @@ export function transform(src, fileName, { fileNameHasSalt = '', namePrefix = ''
             if (declarationNode.type !== 'Declaration')
                 continue;
             if (declarationNode.value.startsWith(cssJsFunctionName + '(') && declarationNode.value.endsWith(')')) {
-                const js = declarationNode.value.slice(cssJsFunctionName.length + 1, -1).trim();
+                if ((!declarationNode.value.startsWith(cssJsFunctionName + '(' + '/*')) ||
+                    (!declarationNode.value.endsWith('*/' + ')'))) {
+                    throw new Error(`The js in css function syntax is js(/* jsexpression */)`);
+                }
+                const js = declarationNode.value.slice(cssJsFunctionName.length + '(/*'.length, -1 * '*/)'.length).trim();
                 const jsStartIndex = newSrc.indexOf(js, declarationNode.start);
                 if (jsStartIndex === -1) {
                     throw new Error('could not find js in css');
