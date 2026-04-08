@@ -20,6 +20,10 @@ export default function svelteJsInCss({
 
         enforce: 'pre', // before svelte
 
+        handleHotUpdate(ctx) {
+            console.log('handleHotUpdate', ctx);
+        },
+
         transform: {
             filter: {
                 id: fileRegex,
