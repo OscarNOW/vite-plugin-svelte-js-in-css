@@ -1,5 +1,7 @@
 // © 2026 Oscar Knap - Alle rechten voorbehouden
 
+import { SourceMapGenerator } from "source-map";
+
 export type mappings = {
     original: [number, number];
     generated: [number, number];
@@ -50,7 +52,7 @@ function shiftPos(
     const lines = deltaStr.split('\n');
 
     if (lines.length === 1) {
-        return [line, col + lines[0].length];
+        return [line, col + lines[0]!.length];
     }
 
     const newLine = line + lines.length - 1;
@@ -58,7 +60,7 @@ function shiftPos(
     if (line === iLine) {
         return [
             newLine,
-            lines[lines.length - 1].length + (col - iCol)
+            lines[lines.length - 1]!.length + (col - iCol)
         ];
     }
 
