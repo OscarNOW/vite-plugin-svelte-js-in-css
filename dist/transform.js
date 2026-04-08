@@ -1,7 +1,7 @@
 // © 2026 Oscar Knap - Alle rechten voorbehouden
 import shortHash from 'short-hash';
 import { parse } from "svelte/compiler";
-import { generateSameMappings, insert, link, mappingsToString, offsetToPos, overwrite } from './sourceMap';
+import { generateSameMappings, insert, link, mappingsToString, offsetToPos, overwrite } from './sourceMap.js';
 const shortPrefix = '_8';
 export function transform(src, fileName, { fileNameHasSalt = '', namePrefix = '', cssJsFunctionName = 'js', } = {}) {
     if (!fileName.endsWith('.svelte'))

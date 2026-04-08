@@ -1,5 +1,5 @@
 // © 2026 Oscar Knap - Alle rechten voorbehouden
-import { transform } from './transform';
+import { transform } from './transform.js';
 const fileRegex = /\.(svelte)$/;
 export default function svelteJsInCss({ fileNameHasSalt = '', namePrefix = '', cssJsFunctionName = 'js', } = {}) {
     return {
