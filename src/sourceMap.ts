@@ -20,23 +20,6 @@ function offsetToPos(str: string, offset: number): [number, number] {
     return [line, col];
 }
 
-// function posToOffset(str: string, pos: [number, number]): number {
-//     let [targetLine, targetCol] = pos;
-//     let line = 1, col = 0;
-
-//     for (let i = 0; i < str.length; i++) {
-//         if (line === targetLine && col === targetCol) return i;
-
-//         if (str[i] === '\n') {
-//             line++;
-//             col = 0;
-//         } else {
-//             col++;
-//         }
-//     }
-//     return str.length;
-// }
-
 function shiftPos(
     pos: [number, number],
     indexPos: [number, number],
@@ -52,7 +35,11 @@ function shiftPos(
     const lines = deltaStr.split('\n');
 
     if (lines.length === 1) {
-        return [line, col + lines[0]!.length];
+        if (line === iLine && col >= iCol) {
+            return [line, col + deltaStr.length];
+        }
+
+        return pos;
     }
 
     const newLine = line + lines.length - 1;
@@ -74,33 +61,23 @@ function shiftPosDelete(
 ): [number, number] {
     let [line, col] = pos;
 
-    // before
-    if (line < startPos[0] || (line === startPos[0] && col < startPos[1])) {
+    if (startPos[0] !== endPos[0]) {
+        throw new Error('shiftPosDelete only supports shifting on same line');
+    }
+
+    if (line !== startPos[0]) {
         return pos;
     }
 
-    // inside deleted → snap to start
-    if (
-        (line > startPos[0] || (line === startPos[0] && col >= startPos[1])) &&
-        (line < endPos[0] || (line === endPos[0] && col <= endPos[1]))
-    ) {
-        return startPos;
+    if (col < startPos[1]) {
+        return pos;
     }
 
-    // after → shift backwards
-    const lineDelta = endPos[0] - startPos[0];
-    if (lineDelta === 0) {
-        return [line, col - (endPos[1] - startPos[1])];
+    if (col < endPos[1]) {
+        return [line, startPos[1]];
     }
 
-    if (line === endPos[0]) {
-        return [
-            line - lineDelta,
-            startPos[1] + (col - endPos[1])
-        ];
-    }
-
-    return [line - lineDelta, col];
+    return [line, col - (endPos[1] - startPos[1])];
 }
 
 /** Generates mappings for the same source */
