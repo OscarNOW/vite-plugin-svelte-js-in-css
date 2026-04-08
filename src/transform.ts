@@ -4,7 +4,7 @@ import type { Plugin } from 'vite';
 
 import shortHash from 'short-hash';
 import { parse } from "svelte/compiler";
-import { generateSameMappings, insert, mappingsToString, overwrite } from './sourceMap';
+import { generateSameMappings, insert, link, mappingsToString, offsetToPos, overwrite } from './sourceMap';
 
 const shortPrefix = '_8';
 
@@ -35,6 +35,9 @@ export function transform(src: string, fileName: string, {
         cssVarNameWithoutDash: string;
         jsVarName: string;
         js: string;
+        originalJsStart: [number, number];
+        originalJsEnd: [number, number];
+        newJsIndex?: number;
     }[] = [];
 
     let useIndex = 0;
@@ -55,6 +58,16 @@ export function transform(src: string, fileName: string, {
             if (declarationNode.value.startsWith(cssJsFunctionName + '(') && declarationNode.value.endsWith(')')) {
 
                 const js = declarationNode.value.slice(cssJsFunctionName.length + 1, -1).trim();
+
+                const jsStartIndex = newSrc.indexOf(js, declarationNode.start);
+                if (jsStartIndex === -1) {
+                    throw new Error('could not find js in css');
+                }
+                const jsEndIndex = jsStartIndex + js.length;
+
+                // doesn't matter that newSrc changes, because line index is same
+                const jsStart = offsetToPos(newSrc, jsStartIndex);
+                const jsEnd = offsetToPos(newSrc, jsEndIndex);
 
                 const id = `${shortPrefix}${fileNameHash}${useIndex}`;
                 const jsVarName = `${namePrefix}${shortPrefix}${useIndex}`;
@@ -78,6 +91,8 @@ export function transform(src: string, fileName: string, {
                     cssVarNameWithoutDash,
                     jsVarName,
                     js,
+                    originalJsStart: jsStart,
+                    originalJsEnd: jsEnd
                 });
 
                 // todo: how to do this without fully re parsing?
@@ -98,10 +113,18 @@ export function transform(src: string, fileName: string, {
     let totalNewJs = '';
     if (uses.length === 1) {
         const use = uses[0]!;
-        totalNewJs += `let ${htmlVarName}=$derived(\`<style>:root{--${use.cssVarNameWithoutDash}:\${${use.js}}}</style>\`);`;
+        let before = `let ${htmlVarName}=$derived(\`<style>:root{--${use.cssVarNameWithoutDash}:\${`;
+        let after = `}}</style>\`);`;
+
+        use.newJsIndex = totalNewJs.length + before.length;
+        totalNewJs += `${before}${use.js}${after}`;
     } else {
         for (const use of uses) {
-            totalNewJs += `let ${use.jsVarName}=$derived(${use.js});`;
+            let before = `let ${use.jsVarName}=$derived(`;
+            let after = `);`;
+
+            use.newJsIndex = totalNewJs.length + before.length;
+            totalNewJs += `${before}${use.js}${after}`;
         }
         totalNewJs += `let ${htmlVarName}=$derived(\`<style>:root{${uses.map((use) => `--${use.cssVarNameWithoutDash}:\${${use.jsVarName}}`).join(';')}}</style>\`);`;
     }
@@ -138,6 +161,7 @@ export function transform(src: string, fileName: string, {
     }
 
     // check if there is a non module script
+    let newJsIndexOffset = 0;
     if (ast.instance) {
         [newSrc, mappings] = insert(
             newSrc,
@@ -145,6 +169,8 @@ export function transform(src: string, fileName: string, {
             ast.instance.end - '</script>'.length,
             `;${totalNewJs}`
         );
+        // + 1 for semicolon
+        newJsIndexOffset = ast.instance.end - '</script>'.length + 1;
     } else {
         [newSrc, mappings] = insert(
             newSrc,
@@ -152,11 +178,24 @@ export function transform(src: string, fileName: string, {
             0,
             `<script>${totalNewJs}</script>`
         );
+        newJsIndexOffset = '<script>'.length;
     }
 
-    ast = parse(newSrc);
+    // re parsing not needed, because ast is not needed after
+    // ast = parse(newSrc);
 
-    // todo: link js from css js function to actual js in source map
+    for (const use of uses) {
+        if (use.newJsIndex === undefined) {
+            throw new Error("Couldn't find new js index");
+        }
+
+        // console.log(use.originalJsStart)
+
+        const generatedJsStart = offsetToPos(newSrc, use.newJsIndex + newJsIndexOffset);
+        const generatedJsEnd = offsetToPos(newSrc, use.newJsIndex + use.js.length + newJsIndexOffset);
+
+        mappings = link(mappings, use.originalJsStart, use.originalJsEnd, generatedJsStart, generatedJsEnd);
+    }
 
     const stringifiedMappings = mappingsToString(mappings, fileName, src);
 

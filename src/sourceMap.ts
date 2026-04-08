@@ -7,7 +7,7 @@ export type mappings = {
     generated: [number, number];
 }[];
 
-function offsetToPos(str: string, offset: number): [number, number] {
+export function offsetToPos(str: string, offset: number): [number, number] {
     let line = 1, col = 0;
     for (let i = 0; i < offset; i++) {
         if (str[i] === '\n') {
