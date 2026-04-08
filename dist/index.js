@@ -19,8 +19,7 @@ export default function svelteJsInCss({ fileNameHasSalt = '', namePrefix = '', c
                     return;
                 return {
                     code: transformation.src,
-                    // map: transformation.map,
-                    map: null,
+                    map: transformation.map,
                 };
             },
         },
