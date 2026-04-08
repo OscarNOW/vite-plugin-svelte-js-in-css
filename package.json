@@ -4,6 +4,13 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "typescript": "^5"
+    "@types/short-hash": "^1.0.3",
+    "typescript": "^5",
+    "vite": "^8.0.7"
+  },
+  "dependencies": {
+    "short-hash": "^1.0.0",
+    "source-map": "^0.7.6",
+    "svelte": "^5.53.12"
   }
 }
