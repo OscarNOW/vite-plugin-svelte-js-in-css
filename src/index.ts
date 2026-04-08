@@ -35,8 +35,7 @@ export default function svelteJsInCss({
 
                 return {
                     code: transformation.src,
-                    // map: transformation.map,
-                    map: null,
+                    map: transformation.map,
                 }
             },
         },
