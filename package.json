@@ -1,8 +1,10 @@
 {
   "name": "vite-plugin-svelte-js-in-css",
-  "module": "src/index.ts",
   "type": "module",
   "private": true,
+  "exports": {
+    "/": "./src/index.ts"
+  },
   "scripts": {
     "dev": "bun --watch test/buttonTest.ts"
   },
