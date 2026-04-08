@@ -123,10 +123,16 @@ export function link(maps, originalStart, originalEnd, generatedStart, generated
     // 1. Remove mappings inside generated range
     const filtered = maps.filter(m => !inRange(m.generated, generatedStart, generatedEnd));
     // 2. Add start mapping
-    filtered.push({
-        original: originalStart,
-        generated: generatedStart
-    });
+    for (let i = 0; i < (generatedEnd[1] - generatedStart[1]); i++) {
+        filtered.push({
+            original: [originalStart[0], originalStart[1] + i],
+            generated: [generatedStart[0], generatedStart[1] + i]
+        });
+    }
+    // filtered.push({
+    //     original: originalStart,
+    //     generated: generatedStart
+    // });
     // 3. Add end mapping (boundary)
     filtered.push({
         original: originalEnd,
