@@ -74,7 +74,7 @@
         background-color: var(--color-main);
         color: white;
 
-        opacity: js(a / 2);
+        opacity: js(/*a / 2*/);
 
         padding: 10px 13px;
         border-radius: 8px;
