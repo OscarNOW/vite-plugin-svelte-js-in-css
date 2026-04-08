@@ -1,6 +1,9 @@
 import fs from 'fs';
 import { transform } from '../src/transform';
 
+// for watch reload
+import './Button.svelte';
+
 const src = fs.readFileSync('test/button.svelte', 'utf-8');
 
 const transformation = transform(src, 'test/button.svelte');
