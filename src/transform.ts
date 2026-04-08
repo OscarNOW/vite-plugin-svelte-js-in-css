@@ -94,6 +94,7 @@ export function transform(src: string, fileName: string, {
 
     let totalNewSvelteHead = `{@html ${htmlVarName}}`;
 
+    // todo: why create separate totalNewJs variable and later do stuff with it. Why not directly after eachother?
     let totalNewJs = '';
     if (uses.length === 1) {
         const use = uses[0]!;
