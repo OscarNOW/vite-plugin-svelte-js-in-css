@@ -27,7 +27,6 @@ export function transform(src: string, fileName: string, {
 
     let newSrc = src;
 
-    // todo: error handling and return?
     let ast = parse(newSrc);
 
     let uses: {
@@ -105,7 +104,6 @@ export function transform(src: string, fileName: string, {
                     originalJsEnd: jsEnd
                 });
 
-                // todo: how to do this without fully re parsing?
                 ast = parse(newSrc);
             }
         }
@@ -166,7 +164,6 @@ export function transform(src: string, fileName: string, {
             );
         }
 
-        // todo: how to do this without fully re parsing?
         ast = parse(newSrc);
     }
 
@@ -198,8 +195,6 @@ export function transform(src: string, fileName: string, {
         if (use.newJsIndex === undefined) {
             throw new Error("Couldn't find new js index");
         }
-
-        // console.log(use.originalJsStart)
 
         const generatedJsStart = offsetToPos(newSrc, use.newJsIndex + newJsIndexOffset);
         const generatedJsEnd = offsetToPos(newSrc, use.newJsIndex + use.js.length + newJsIndexOffset);
