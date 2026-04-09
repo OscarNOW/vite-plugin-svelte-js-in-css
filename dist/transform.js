@@ -3,14 +3,14 @@ import shortHash from 'short-hash';
 import { parse } from "svelte/compiler";
 import { generateSameMappings, insert, link, mappingsToString, offsetToPos, overwrite } from './sourceMap.js';
 const shortPrefix = '_8';
-export function transform(src, fileName, { fileNameHasSalt = '', namePrefix = '', cssJsFunctionName = 'js', } = {}) {
+export function transform(src, fileName, { fileNameHashSalt = '', namePrefix = '', cssJsFunctionName = 'js', } = {}) {
     if (!fileName.endsWith('.svelte'))
         return;
     if (!src.includes('<style'))
         return;
     if (!src.includes('js('))
         return;
-    const fileNameHash = shortHash(fileName + (fileNameHasSalt || ''));
+    const fileNameHash = shortHash(fileName + (fileNameHashSalt || ''));
     let mappings = generateSameMappings(src);
     let newSrc = src;
     // todo: error handling and return?

@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite';
-export default function svelteJsInCss({ fileNameHasSalt, namePrefix, cssJsFunctionName, }?: {
-    fileNameHasSalt?: string;
+export default function svelteJsInCss({ fileNameHashSalt, namePrefix, cssJsFunctionName, }?: {
+    fileNameHashSalt?: string;
     namePrefix?: string;
     cssJsFunctionName?: string;
 }): Plugin;

@@ -1,7 +1,7 @@
 // © 2026 Oscar Knap - Alle rechten voorbehouden
 import { transform } from './transform.js';
 const fileRegex = /\.(svelte)$/;
-export default function svelteJsInCss({ fileNameHasSalt = '', namePrefix = '', cssJsFunctionName = 'js', } = {}) {
+export default function svelteJsInCss({ fileNameHashSalt = '', namePrefix = '', cssJsFunctionName = 'js', } = {}) {
     return {
         name: 'svelte-js-in-css',
         enforce: 'pre', // before svelte
@@ -11,7 +11,7 @@ export default function svelteJsInCss({ fileNameHasSalt = '', namePrefix = '', c
             },
             handler(src, fileName) {
                 const transformation = transform(src, fileName, {
-                    fileNameHasSalt,
+                    fileNameHashSalt,
                     namePrefix,
                     cssJsFunctionName,
                 });

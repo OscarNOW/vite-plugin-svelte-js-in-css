@@ -9,11 +9,11 @@ import { generateSameMappings, insert, link, mappingsToString, offsetToPos, over
 const shortPrefix = '_8';
 
 export function transform(src: string, fileName: string, {
-    fileNameHasSalt = '',
+    fileNameHashSalt = '',
     namePrefix = '',
     cssJsFunctionName = 'js',
 }: {
-    fileNameHasSalt?: string;
+    fileNameHashSalt?: string;
     namePrefix?: string;
     cssJsFunctionName?: string;
 } = {}): undefined | { src: string; map: string; } {
@@ -21,7 +21,7 @@ export function transform(src: string, fileName: string, {
     if (!src.includes('<style')) return;
     if (!src.includes('js(')) return;
 
-    const fileNameHash = shortHash(fileName + (fileNameHasSalt || ''));
+    const fileNameHash = shortHash(fileName + (fileNameHashSalt || ''));
 
     let mappings = generateSameMappings(src);
 

@@ -1,5 +1,5 @@
-export declare function transform(src: string, fileName: string, { fileNameHasSalt, namePrefix, cssJsFunctionName, }?: {
-    fileNameHasSalt?: string;
+export declare function transform(src: string, fileName: string, { fileNameHashSalt, namePrefix, cssJsFunctionName, }?: {
+    fileNameHashSalt?: string;
     namePrefix?: string;
     cssJsFunctionName?: string;
 }): undefined | {

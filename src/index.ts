@@ -7,11 +7,11 @@ import { transform } from './transform';
 const fileRegex = /\.(svelte)$/;
 
 export default function svelteJsInCss({
-    fileNameHasSalt = '',
+    fileNameHashSalt = '',
     namePrefix = '',
     cssJsFunctionName = 'js',
 }: {
-    fileNameHasSalt?: string;
+    fileNameHashSalt?: string;
     namePrefix?: string;
     cssJsFunctionName?: string;
 } = {}): Plugin {
@@ -26,7 +26,7 @@ export default function svelteJsInCss({
             },
             handler(src, fileName) {
                 const transformation = transform(src, fileName, {
-                    fileNameHasSalt,
+                    fileNameHashSalt,
                     namePrefix,
                     cssJsFunctionName,
                 });
