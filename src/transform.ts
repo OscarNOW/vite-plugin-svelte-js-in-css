@@ -115,29 +115,9 @@ export function transform(src: string, fileName: string, {
 
     const htmlVarName = `${namePrefix}${shortPrefix}`;
 
-    let totalNewSvelteHead = `{@html ${htmlVarName}}`;
-
-    // todo: why create separate totalNewJs variable and later do stuff with it. Why not directly after eachother?
-    let totalNewJs = '';
-    if (uses.length === 1) {
-        const use = uses[0]!;
-        let before = `let ${htmlVarName}=$derived(\`<style>:root{--${use.cssVarNameWithoutDash}:\${`;
-        let after = `}}</style>\`);`;
-
-        use.newJsIndex = totalNewJs.length + before.length;
-        totalNewJs += `${before}${use.js}${after}`;
-    } else {
-        for (const use of uses) {
-            let before = `let ${use.jsVarName}=$derived(`;
-            let after = `);`;
-
-            use.newJsIndex = totalNewJs.length + before.length;
-            totalNewJs += `${before}${use.js}${after}`;
-        }
-        totalNewJs += `let ${htmlVarName}=$derived(\`<style>:root{${uses.map((use) => `--${use.cssVarNameWithoutDash}:\${${use.jsVarName}}`).join(';')}}</style>\`);`;
-    }
-
     {
+        const newSvelteHeadCode = `{@html ${htmlVarName}}`;
+
         let svelteHeadNode = null;
 
         for (const node of ast.html.children) {
@@ -153,18 +133,37 @@ export function transform(src: string, fileName: string, {
                 mappings,
                 svelteHeadNode.start,
                 svelteHeadNode.end,
-                totalNewSvelteHead
+                newSvelteHeadCode
             );
         } else {
             [newSrc, mappings] = insert(
                 newSrc,
                 mappings,
                 0,
-                `<svelte:head>${totalNewSvelteHead}</svelte:head>`
+                `<svelte:head>${newSvelteHeadCode}</svelte:head>`
             );
         }
 
         ast = parse(newSrc);
+    }
+
+    let newJsCode = '';
+    if (uses.length === 1) {
+        const use = uses[0]!;
+        let before = `let ${htmlVarName}=$derived(\`<style>:root{--${use.cssVarNameWithoutDash}:\${`;
+        let after = `}}</style>\`);`;
+
+        use.newJsIndex = newJsCode.length + before.length;
+        newJsCode += `${before}${use.js}${after}`;
+    } else {
+        for (const use of uses) {
+            let before = `let ${use.jsVarName}=$derived(`;
+            let after = `);`;
+
+            use.newJsIndex = newJsCode.length + before.length;
+            newJsCode += `${before}${use.js}${after}`;
+        }
+        newJsCode += `let ${htmlVarName}=$derived(\`<style>:root{${uses.map((use) => `--${use.cssVarNameWithoutDash}:\${${use.jsVarName}}`).join(';')}}</style>\`);`;
     }
 
     // check if there is a non module script
@@ -174,7 +173,7 @@ export function transform(src: string, fileName: string, {
             newSrc,
             mappings,
             ast.instance.end - '</script>'.length,
-            `;${totalNewJs}`
+            `;${newJsCode}`
         );
         // + 1 for semicolon
         newJsIndexOffset = ast.instance.end - '</script>'.length + 1;
@@ -183,7 +182,7 @@ export function transform(src: string, fileName: string, {
             newSrc,
             mappings,
             0,
-            `<script>${totalNewJs}</script>`
+            `<script>${newJsCode}</script>`
         );
         newJsIndexOffset = '<script>'.length;
     }
