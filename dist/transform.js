@@ -72,7 +72,7 @@ export function transform(src, fileName, { fileNameHashSalt = '', namePrefix = '
     if (uses.length === 1) {
         const use = uses[0];
         let before = `let ${htmlVarName}=$derived(\`<style>:root{--${use.cssVarNameWithoutDash}:\${`;
-        let after = `}}\n</style>\`);`;
+        let after = `}}</style>\`);`;
         use.newJsIndex = totalNewJs.length + before.length;
         totalNewJs += `${before}${use.js}${after}`;
     }
@@ -83,7 +83,7 @@ export function transform(src, fileName, { fileNameHashSalt = '', namePrefix = '
             use.newJsIndex = totalNewJs.length + before.length;
             totalNewJs += `${before}${use.js}${after}`;
         }
-        totalNewJs += `let ${htmlVarName}=$derived(\`<style>:root{${uses.map((use) => `--${use.cssVarNameWithoutDash}:\${${use.jsVarName}}`).join(';')}}\n</style>\`);`;
+        totalNewJs += `let ${htmlVarName}=$derived(\`<style>:root{${uses.map((use) => `--${use.cssVarNameWithoutDash}:\${${use.jsVarName}}`).join(';')}}</style>\`);`;
     }
     {
         let svelteHeadNode = null;
