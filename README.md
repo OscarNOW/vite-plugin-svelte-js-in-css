@@ -90,6 +90,7 @@ The css function name used to evaluate javascript. By default it's `js`.
 
 ## Details
 
-- The javascript context is the same as in the component `<script>`. This means that you can use variables or functions defined inside the `<script>`.
+- The javascript context is the same as in the svelte file `<script>`. This means that you can use variables or functions defined inside the `<script>`.
 - Internally, the javascript expressions get put inside a Svelte `$derived(...)`. This means that the expression automatically gets re-run when one of the dependencies changes. [See Svelte `$derived`](https://svelte.dev/docs/svelte/$derived). If you do not want this, use the Svelte [`untrack`](https://svelte.dev/docs/svelte/svelte#untrack) function.
 - Internally, the javascript expression gets put inside the existing `<script>` tag. (If there isn't one, one will be created). If you want to use Typescript, make sure you have a `<script lang="ts">` in the component. (It could also be empty like this: `<script lang="ts"></script>`)
+- Internally, global CSS variables are used for the result of the javascript extension. This means that the styles don't have to reference elements in the svelte file.
