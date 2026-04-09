@@ -74,7 +74,7 @@ export function transform(src, fileName, { fileNameHashSalt = '', namePrefix = '
             }
         }
         if (svelteHeadNode) {
-            [newSrc, mappings] = overwrite(newSrc, mappings, svelteHeadNode.start, svelteHeadNode.end, newSvelteHeadCode);
+            [newSrc, mappings] = insert(newSrc, mappings, svelteHeadNode.start + '<svelte:head>'.length, newSvelteHeadCode);
         }
         else {
             [newSrc, mappings] = insert(newSrc, mappings, 0,
