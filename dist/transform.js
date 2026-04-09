@@ -71,17 +71,15 @@ export function transform(src, fileName, { fileNameHashSalt = '', namePrefix = '
     let totalNewJs = '';
     if (uses.length === 1) {
         const use = uses[0];
-        let before = `let ${htmlVarName}=$derived(\`<style>:root{--${use.cssVarNameWithoutDash}:\${\n`;
-        // space and newlines for source map
-        let after = ` \n}}</style>\`);`;
+        let before = `let ${htmlVarName}=$derived(\`<style>:root{--${use.cssVarNameWithoutDash}:\${`;
+        let after = `}}</style>\`);`;
         use.newJsIndex = totalNewJs.length + before.length;
         totalNewJs += `${before}${use.js}${after}`;
     }
     else {
         for (const use of uses) {
-            let before = `let ${use.jsVarName}=$derived(\n`;
-            // space and newlines for source map
-            let after = ` \n);`;
+            let before = `let ${use.jsVarName}=$derived(`;
+            let after = `);`;
             use.newJsIndex = totalNewJs.length + before.length;
             totalNewJs += `${before}${use.js}${after}`;
         }
