@@ -128,11 +128,10 @@ export function transform(src: string, fileName: string, {
         }
 
         if (svelteHeadNode) {
-            [newSrc, mappings] = overwrite(
+            [newSrc, mappings] = insert(
                 newSrc,
                 mappings,
-                svelteHeadNode.start,
-                svelteHeadNode.end,
+                svelteHeadNode.start + '<svelte:head>'.length,
                 newSvelteHeadCode
             );
         } else {
