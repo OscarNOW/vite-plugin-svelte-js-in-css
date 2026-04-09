@@ -124,7 +124,7 @@ export function link(maps, originalStart, originalEnd, generatedStart, generated
     const filtered = maps.filter(m => !inRange(m.generated, generatedStart, generatedEnd));
     for (let generatedLine = generatedStart[0]; generatedLine <= generatedEnd[0]; generatedLine++) {
         let generatedLineStart = generatedLine === generatedStart[0] ? generatedStart[1] : 0;
-        let generatedLineLength = generatedLine === generatedEnd[0] ? generatedEnd[1] : 1;
+        let generatedLineLength = generatedLine === generatedEnd[0] ? (generatedEnd[1] - generatedLineStart) : 1;
         let originalLine = originalStart[0] + (generatedLine - generatedStart[0]);
         let originalLineStart = originalLine === originalStart[0] ? originalStart[1] : 0;
         // 2. Add start mapping
