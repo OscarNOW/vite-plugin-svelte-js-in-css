@@ -27,19 +27,7 @@ export function transform(src: string, fileName: string, {
 
     let newSrc = src;
 
-    let ast: ReturnType<typeof parse>;
-    try {
-        ast = parse(newSrc);
-    } catch (e) {
-        const stringE = `${e}`;
-
-        if (stringE.includes('https://svelte.dev/e/legacy_export_invalid') || stringE.includes('in runes mode')) {
-            // svelte file is in legacy mode
-            return;
-        }
-
-        throw e;
-    }
+    let ast = parse(newSrc);
 
     let uses: {
         id: string;
