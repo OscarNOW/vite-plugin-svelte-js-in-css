@@ -3,3 +3,5 @@ node_modules
 zzzgenerated.svelte
 zzzoriginal.svelte
 zzzsourcemap.json
+
+*.tgz

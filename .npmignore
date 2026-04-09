@@ -5,3 +5,5 @@ zzzoriginal.svelte
 zzzsourcemap.json
 
 test/
+src/
+*.tgz
