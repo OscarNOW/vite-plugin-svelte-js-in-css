@@ -1,7 +1,18 @@
 {
   "name": "vite-plugin-svelte-js-in-css",
+  "description": "Use Javascript expressions directly in your Svelte styles",
+  "version": "0.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OscarNOW/vite-plugin-svelte-js-in-css"
+  },
+  "bugs": {
+    "url": "https://github.com/OscarNOW/vite-plugin-svelte-js-in-css/issues"
+  },
+  "homepage": "https://github.com/OscarNOW/vite-plugin-svelte-js-in-css#readme",
   "type": "module",
-  "private": true,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
