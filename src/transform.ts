@@ -121,23 +121,14 @@ export function transform(src: string, fileName: string, {
 
     // todo: why create separate totalNewJs variable and later do stuff with it. Why not directly after eachother?
     let totalNewJs = '';
-    if (uses.length === 1) {
-        const use = uses[0]!;
-        let before = `let ${htmlVarName}=$derived(\`<style>:root{--${use.cssVarNameWithoutDash}:\${`;
-        let after = `}}</style>\`);`;
+    for (const use of uses) {
+        let before = `let ${use.jsVarName}=$derived(`;
+        let after = `);`;
 
         use.newJsIndex = totalNewJs.length + before.length;
         totalNewJs += `${before}${use.js}${after}`;
-    } else {
-        for (const use of uses) {
-            let before = `let ${use.jsVarName}=$derived(`;
-            let after = `);`;
-
-            use.newJsIndex = totalNewJs.length + before.length;
-            totalNewJs += `${before}${use.js}${after}`;
-        }
-        totalNewJs += `let ${htmlVarName}=$derived(\`<style>:root{${uses.map((use) => `--${use.cssVarNameWithoutDash}:\${${use.jsVarName}}`).join(';')}}</style>\`);`;
     }
+    totalNewJs += `let ${htmlVarName}=$derived(\`<style>:root{${uses.map((use) => `--${use.cssVarNameWithoutDash}:\${${use.jsVarName}}`).join(';')}}</style>\`);`;
 
     {
         let svelteHeadNode = null;
