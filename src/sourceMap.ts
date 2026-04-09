@@ -61,20 +61,20 @@ function shiftPosDelete(
 ): [number, number] {
     let [line, col] = pos;
 
-    if (startPos[0] !== endPos[0]) {
-        throw new Error('shiftPosDelete only supports shifting on same line');
-    }
-
-    if (line !== startPos[0]) {
+    if (line < startPos[0]) {
         return pos;
     }
 
-    if (col < startPos[1]) {
+    if (line > endPos[0]) {
+        return [line - (endPos[0] - startPos[0]), col];
+    }
+
+    if (line === startPos[0] && col < startPos[1]) {
         return pos;
     }
 
-    if (col < endPos[1]) {
-        return [line, startPos[1]];
+    if (line < endPos[0] || col < endPos[1]) {
+        return startPos;
     }
 
     return [line, col - (endPos[1] - startPos[1])];
@@ -177,23 +177,27 @@ export function link(maps: mappings, originalStart: [number, number], originalEn
     // 1. Remove mappings inside generated range
     const filtered = maps.filter(m => !inRange(m.generated, generatedStart, generatedEnd));
 
-    // 2. Add start mapping
-    for (let i = 0; i < (generatedEnd[1] - generatedStart[1]); i++) {
+    for (let generatedLine = generatedStart[0]; generatedLine <= generatedEnd[0]; generatedLine++) {
+        let generatedLineStart = generatedLine === generatedStart[0] ? generatedStart[1] : 0;
+        let generatedLineLength = generatedLine === generatedEnd[0] ? generatedEnd[1] : 1;
+
+        let originalLine = originalStart[0] + (generatedLine - generatedStart[0]);
+        let originalLineStart = originalLine === originalStart[0] ? originalStart[1] : 0;
+
+        // 2. Add start mapping
+        for (let columnOffset = 0; columnOffset < (generatedLineLength); columnOffset++) {
+            filtered.push({
+                original: [originalLine, originalLineStart + columnOffset],
+                generated: [generatedLine, generatedLineStart + columnOffset]
+            });
+        }
+
+        // 3. Add end mapping (boundary)
         filtered.push({
-            original: [originalStart[0], originalStart[1] + i],
-            generated: [generatedStart[0], generatedStart[1] + i]
+            original: originalEnd,
+            generated: generatedEnd
         });
     }
-    // filtered.push({
-    //     original: originalStart,
-    //     generated: generatedStart
-    // });
-
-    // 3. Add end mapping (boundary)
-    filtered.push({
-        original: originalEnd,
-        generated: generatedEnd
-    });
 
     // 4. Sort mappings by generated position
     filtered.sort((a, b) => comparePos(a.generated, b.generated));
