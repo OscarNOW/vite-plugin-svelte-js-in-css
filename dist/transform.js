@@ -13,7 +13,6 @@ export function transform(src, fileName, { fileNameHashSalt = '', namePrefix = '
     const fileNameHash = shortHash(fileName + (fileNameHashSalt || ''));
     let mappings = generateSameMappings(src);
     let newSrc = src;
-    // todo: error handling and return?
     let ast = parse(newSrc);
     let uses = [];
     let useIndex = 0;
@@ -57,7 +56,6 @@ export function transform(src, fileName, { fileNameHashSalt = '', namePrefix = '
                     originalJsStart: jsStart,
                     originalJsEnd: jsEnd
                 });
-                // todo: how to do this without fully re parsing?
                 ast = parse(newSrc);
             }
         }
@@ -66,26 +64,8 @@ export function transform(src, fileName, { fileNameHashSalt = '', namePrefix = '
         return;
     }
     const htmlVarName = `${namePrefix}${shortPrefix}`;
-    let totalNewSvelteHead = `{@html ${htmlVarName}}`;
-    // todo: why create separate totalNewJs variable and later do stuff with it. Why not directly after eachother?
-    let totalNewJs = '';
-    if (uses.length === 1) {
-        const use = uses[0];
-        let before = `let ${htmlVarName}=$derived(\`<style>:root{--${use.cssVarNameWithoutDash}:\${`;
-        let after = `}}</style>\`);`;
-        use.newJsIndex = totalNewJs.length + before.length;
-        totalNewJs += `${before}${use.js}${after}`;
-    }
-    else {
-        for (const use of uses) {
-            let before = `let ${use.jsVarName}=$derived(`;
-            let after = `);`;
-            use.newJsIndex = totalNewJs.length + before.length;
-            totalNewJs += `${before}${use.js}${after}`;
-        }
-        totalNewJs += `let ${htmlVarName}=$derived(\`<style>:root{${uses.map((use) => `--${use.cssVarNameWithoutDash}:\${${use.jsVarName}}`).join(';')}}</style>\`);`;
-    }
     {
+        const newSvelteHeadCode = `{@html ${htmlVarName}}`;
         let svelteHeadNode = null;
         for (const node of ast.html.children) {
             if (node.type === 'Head') {
@@ -94,23 +74,43 @@ export function transform(src, fileName, { fileNameHashSalt = '', namePrefix = '
             }
         }
         if (svelteHeadNode) {
-            [newSrc, mappings] = overwrite(newSrc, mappings, svelteHeadNode.start, svelteHeadNode.end, totalNewSvelteHead);
+            [newSrc, mappings] = overwrite(newSrc, mappings, svelteHeadNode.start, svelteHeadNode.end, newSvelteHeadCode);
         }
         else {
-            [newSrc, mappings] = insert(newSrc, mappings, 0, `<svelte:head>${totalNewSvelteHead}</svelte:head>`);
+            [newSrc, mappings] = insert(newSrc, mappings, 0,
+                // extra spaces for svelte parser
+                ` <svelte:head>${newSvelteHeadCode}</svelte:head> `);
         }
-        // todo: how to do this without fully re parsing?
         ast = parse(newSrc);
+    }
+    let newJsCode = '';
+    if (uses.length === 1) {
+        const use = uses[0];
+        let before = `let ${htmlVarName}=$derived(\`<style>:root{--${use.cssVarNameWithoutDash}:\${`;
+        let after = `}}</style>\`);`;
+        use.newJsIndex = newJsCode.length + before.length;
+        newJsCode += `${before}${use.js}${after}`;
+    }
+    else {
+        for (const use of uses) {
+            let before = `let ${use.jsVarName}=$derived(`;
+            let after = `);`;
+            use.newJsIndex = newJsCode.length + before.length;
+            newJsCode += `${before}${use.js}${after}`;
+        }
+        newJsCode += `let ${htmlVarName}=$derived(\`<style>:root{${uses.map((use) => `--${use.cssVarNameWithoutDash}:\${${use.jsVarName}}`).join(';')}}</style>\`);`;
     }
     // check if there is a non module script
     let newJsIndexOffset = 0;
     if (ast.instance) {
-        [newSrc, mappings] = insert(newSrc, mappings, ast.instance.end - '</script>'.length, `;${totalNewJs}`);
+        [newSrc, mappings] = insert(newSrc, mappings, ast.instance.end - '</script>'.length, `;${newJsCode}`);
         // + 1 for semicolon
         newJsIndexOffset = ast.instance.end - '</script>'.length + 1;
     }
     else {
-        [newSrc, mappings] = insert(newSrc, mappings, 0, `<script>${totalNewJs}</script>`);
+        [newSrc, mappings] = insert(newSrc, mappings, 0,
+            // extra spaces for svelte parser
+            ` <script>${newJsCode}</script> `);
         newJsIndexOffset = '<script>'.length;
     }
     // re parsing not needed, because ast is not needed after
@@ -119,7 +119,6 @@ export function transform(src, fileName, { fileNameHashSalt = '', namePrefix = '
         if (use.newJsIndex === undefined) {
             throw new Error("Couldn't find new js index");
         }
-        // console.log(use.originalJsStart)
         const generatedJsStart = offsetToPos(newSrc, use.newJsIndex + newJsIndexOffset);
         const generatedJsEnd = offsetToPos(newSrc, use.newJsIndex + use.js.length + newJsIndexOffset);
         mappings = link(mappings, use.originalJsStart, use.originalJsEnd, generatedJsStart, generatedJsEnd);

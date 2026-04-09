@@ -140,7 +140,8 @@ export function transform(src: string, fileName: string, {
                 newSrc,
                 mappings,
                 0,
-                `<svelte:head>${newSvelteHeadCode}</svelte:head>`
+                // extra spaces for svelte parser
+                ` <svelte:head>${newSvelteHeadCode}</svelte:head> `
             );
         }
 
@@ -182,7 +183,8 @@ export function transform(src: string, fileName: string, {
             newSrc,
             mappings,
             0,
-            `<script>${newJsCode}</script>`
+            // extra spaces for svelte parser
+            ` <script>${newJsCode}</script> `
         );
         newJsIndexOffset = '<script>'.length;
     }
